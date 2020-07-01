@@ -45,10 +45,23 @@ func StartTestCluster(size int, stdout, stderr io.Writer) (*TestCluster, error) 
 			return nil, err
 		}
 		port := startPort + serverN*3
+
+		// Convert windows style path to posix style path
+		// to avoid that java zookeeper server omits the
+		// backslash in dataDir when loading cfg.
+		// For example, java zookeeper server will transfer
+		//     C:\Users\AppData\Local\Temp
+		// to
+		//     C:UsersAppDataLocalTemp
+		// So we should use
+		//     C:/Users/AppData/Local/Temp
+		// to avoid this.
+		dataDir := filepath.ToSlash(srvPath)
 		cfg := ServerConfig{
 			ClientPort: port,
-			DataDir:    srvPath,
+			DataDir:    dataDir,
 		}
+
 		for i := 0; i < size; i++ {
 			cfg.Servers = append(cfg.Servers, ServerConfigServer{
 				ID:                 i + 1,
