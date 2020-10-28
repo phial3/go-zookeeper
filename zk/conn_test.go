@@ -55,3 +55,28 @@ func TestRecurringReAuthHang(t *testing.T) {
 
 	<-conn.debugReauthDone
 }
+
+func TestDeadlockInClose(t *testing.T) {
+	c := &Conn{
+		shouldQuit:     make(chan struct{}),
+		connectTimeout: 1 * time.Second,
+		sendChan:       make(chan *request, sendChanSize),
+		logger:         DefaultLogger,
+	}
+
+	for i := 0; i < sendChanSize; i++ {
+		c.sendChan <- &request{}
+	}
+
+	okChan := make(chan struct{})
+	go func() {
+		c.Close()
+		close(okChan)
+	}()
+
+	select {
+	case <-okChan:
+	case <-time.After(3 * time.Second):
+		t.Fatal("apparent deadlock!")
+	}
+}
