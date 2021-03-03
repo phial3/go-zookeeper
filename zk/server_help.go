@@ -26,7 +26,7 @@ type TestCluster struct {
 	Servers []TestServer
 }
 
-func StartTestCluster(size int, stdout, stderr io.Writer) (*TestCluster, error) {
+func StartTestCluster(size int,retryTimes int, stdout, stderr io.Writer) (*TestCluster, error) {
 	tmpPath, err := ioutil.TempDir("", "gozk")
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func StartTestCluster(size int, stdout, stderr io.Writer) (*TestCluster, error) 
 			Srv:  srv,
 		})
 	}
-	if err := cluster.waitForStart(10, time.Second); err != nil {
+	if err := cluster.waitForStart(retryTimes, time.Second); err != nil {
 		return nil, err
 	}
 	success = true
