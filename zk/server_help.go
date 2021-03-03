@@ -51,7 +51,7 @@ func StartTestCluster(size int, stdout, stderr io.Writer, opts ...Option) (*Test
 			cluster.Stop()
 		}
 	}()
-	options := &Options{}
+	options := &Options{retryTimes: 10}
 	for _, opt := range opts {
 		opt(options)
 	}
