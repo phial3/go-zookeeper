@@ -26,19 +26,22 @@ type TestCluster struct {
 	Servers []TestServer
 }
 
-type Options struct {
+type options struct {
 	retryTimes int
 }
 
-type Option func(*Options)
 
-func WithRetryTimes(t int) Option {
-	return func(opt *Options) {
+type option func(*options)
+
+// WithRetryTimes set retry times when StartTestCluster
+func WithRetryTimes(t int) option {
+	return func(opt *options) {
 		opt.retryTimes = t
 	}
 }
 
-func StartTestCluster(size int, stdout, stderr io.Writer, opts ...Option) (*TestCluster, error) {
+//StartTestCluster start zk cluster
+func StartTestCluster(size int, stdout, stderr io.Writer, opts ...option) (*TestCluster, error) {
 	tmpPath, err := ioutil.TempDir("", "gozk")
 	if err != nil {
 		return nil, err
@@ -51,7 +54,7 @@ func StartTestCluster(size int, stdout, stderr io.Writer, opts ...Option) (*Test
 			cluster.Stop()
 		}
 	}()
-	options := &Options{retryTimes: 10}
+	options := &options{retryTimes: 10}
 	for _, opt := range opts {
 		opt(options)
 	}
