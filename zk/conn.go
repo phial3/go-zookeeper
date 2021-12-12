@@ -873,6 +873,7 @@ func (c *Conn) recvLoop(conn net.Conn) error {
 				Path:  res.Path,
 				Err:   nil,
 			}
+			// 1. Send events to the upper layer for processing
 			c.sendEvent(ev)
 			wTypes := make([]WatchType, 0, 2)
 			switch res.Type {
@@ -884,6 +885,7 @@ func (c *Conn) recvLoop(conn net.Conn) error {
 				wTypes = append(wTypes, WatchTypeChild)
 			}
 			c.watchersLock.Lock()
+			// 2. find watcher and send event to watcher
 			for _, t := range wTypes {
 				wpt := WatchPathType{res.Path, t}
 				if watchers, ok := c.watchers[wpt]; ok && len(watchers) > 0 {
